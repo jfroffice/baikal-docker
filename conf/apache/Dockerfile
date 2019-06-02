@@ -1,7 +1,7 @@
 # Multi-stage build, see https://docs.docker.com/develop/develop-images/multistage-build/
 FROM amd64/debian:9-slim AS builder
 
-ENV VERSION 0.4.6
+ENV VERSION 0.5.3
 
 ADD https://github.com/sabre-io/Baikal/releases/download/$VERSION/baikal-$VERSION.zip /tmp/baikal.zip
 RUN apt-get update && apt-get install -y unzip && unzip -q /tmp/baikal.zip -d /tmp
@@ -22,12 +22,12 @@ RUN chown -R www-data:www-data /var/www/baikal &&\
     docker-php-ext-install pdo pdo_mysql
 
 # Configure Apache + HTTPS
-COPY files/apache.conf /etc/apache2/sites-enabled/000-default.conf
+COPY conf/apache/apache.conf /etc/apache2/sites-enabled/000-default.conf
 RUN a2enmod rewrite ssl && openssl req -x509 -newkey rsa:2048 -subj "/C=  " -keyout /etc/ssl/private/baikal.private.pem -out /etc/ssl/private/baikal.public.pem -days 3650 -nodes
 
 # Expose HTTPS & data directory
 EXPOSE 443
 VOLUME /var/www/baikal/Specific
 
-COPY files/start.sh /opt
+COPY conf/apache/start.sh /opt
 CMD [ "sh", "/opt/start.sh" ]

@@ -1,7 +1,7 @@
 # Multi-stage build, see https://docs.docker.com/develop/develop-images/multistage-build/
 FROM amd64/debian:9-slim AS builder
 
-ENV VERSION 0.4.6
+ENV VERSION 0.5.3
 
 ADD https://github.com/sabre-io/Baikal/releases/download/$VERSION/baikal-$VERSION.zip /tmp/baikal.zip
 RUN apt-get update && apt-get install -y unzip && unzip -q /tmp/baikal.zip -d /tmp
@@ -9,12 +9,6 @@ RUN apt-get update && apt-get install -y unzip && unzip -q /tmp/baikal.zip -d /t
 
 # Final Docker image
 FROM amd64/nginx:mainline
-
-LABEL maintainer="cyrill.kulka@gmail.com"
-LABEL description="Baikal is a Cal and CardDAV server, based on sabre/dav, that includes an administrative interface for easy management."
-LABEL version="0.4.6"
-LABEL repository="https://github.com/ckulka/baikal-docker"
-LABEL website="http://sabre.io/baikal/"
 
 # Install dependencies: PHP & SQLite3
 RUN apt-get update && apt-get install -y \
@@ -31,7 +25,7 @@ RUN apt-get update && apt-get install -y \
 # Add Baikal & nginx configuration
 COPY --from=builder /tmp/baikal /var/www/baikal
 RUN chown -R nginx:nginx /var/www/baikal
-COPY files/nginx.conf /etc/nginx/conf.d/default.conf
+COPY conf/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 VOLUME /var/www/baikal/Specific
 CMD /etc/init.d/php7.0-fpm start && chown -R nginx:nginx /var/www/baikal/Specific && nginx -g "daemon off;"

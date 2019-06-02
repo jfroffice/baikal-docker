@@ -1,0 +1,15 @@
+# Docker Compose file for a Baikal server
+
+version: '2.4'
+services:
+  baikal:
+    build:
+      context: .
+      dockerfile: conf/nginx/Dockerfile
+    ports:
+      - "8008:80"
+    volumes:
+      - baikal:/var/www/baikal/Specific
+
+volumes:
+  baikal:
